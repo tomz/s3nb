@@ -276,7 +276,7 @@ class S3ContentsManager(ContentsManager):
         k.key = self._path_to_s3_key(path)
 
         with tempfile.NamedTemporaryFile() as f:
-            f.write(content)
+            f.write(bcontent)
             f.seek(0)
             k.set_contents_from_file(f)
 
