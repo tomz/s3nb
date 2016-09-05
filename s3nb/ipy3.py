@@ -7,11 +7,13 @@ import boto
 
 from tornado import web
 
-from IPython import nbformat
-from IPython.html.services.contents.filecheckpoints import GenericFileCheckpoints
-from IPython.html.services.contents.manager import ContentsManager
-from IPython.utils import tz
+import nbformat
+from notebook.services.contents.filecheckpoints import GenericFileCheckpoints
+from notebook.services.contents.manager import ContentsManager
+from notebook.services.contents import tz
 
+import logging
+logger = logging.getLogger(__name__)
 
 # s3 return different time formats in different situations apparently
 S3_TIMEFORMAT_GET_KEY = '%a, %d %b %Y %H:%M:%S GMT'
@@ -282,14 +284,14 @@ class S3ContentsManager(ContentsManager):
 
     def _save_notebook(self, path, nb):
         self.log.debug('_save_notebook: %s', locals())
-
         k = boto.s3.key.Key(self.bucket)
         k.key = self._path_to_s3_key(path)
 
         try:
-            with tempfile.NamedTemporaryFile() as t, codecs.open(t.name, mode='w', encoding='utf-8') as f:
-                # write tempfile with utf-8 encoding
-                nbformat.write(nb, f, version=nbformat.NO_CONVERT)
+            with tempfile.NamedTemporaryFile() as t:
+                with codecs.open(t.name, mode='w', encoding='utf-8') as f:
+                    # write tempfile with utf-8 encoding
+                    nbformat.write(nb, f, version=nbformat.NO_CONVERT)
                 # upload as bytes (t's fp didn't advance)
                 k.set_contents_from_file(t)
         except Exception as e:
