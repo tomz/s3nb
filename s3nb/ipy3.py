@@ -104,7 +104,7 @@ class S3ContentsManager(ContentsManager):
         # ensure prefix ends with the delimiter
         if not self.s3_prefix.endswith(self.s3_key_delimiter) and self.s3_prefix != '':
             self.s3_prefix += self.s3_key_delimiter
-        self.s3_connection = boto.connect_s3()
+        self.s3_connection = boto.connect_s3(host='s3.amazonaws.com')
         self.bucket = self.s3_connection.get_bucket(self.s3_bucket)
         self.log.debug("initialized base_uri: %s bucket: %s prefix: %s",
             self.s3_base_uri, self.s3_bucket, self.s3_prefix)
